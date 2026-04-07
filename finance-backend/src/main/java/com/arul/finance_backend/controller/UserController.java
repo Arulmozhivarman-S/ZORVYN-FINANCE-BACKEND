@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.arul.finance_backend.JWT.JwtUtills;
 import com.arul.finance_backend.dtos.UserDto;
 import com.arul.finance_backend.model.User;
 import com.arul.finance_backend.service.UserService;
 
+import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.GetMapping;
 
 
@@ -37,7 +40,13 @@ public class UserController {
 
     
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long userId, @RequestParam Long currentUserId) {
+    public ResponseEntity<UserDto> getUser(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String token) {
+
+        Claims claims = JwtUtills.extractClaims(token.replace("Bearer ", ""));
+        Long currentUserId = Long.parseLong(claims.getSubject());
+
         return ResponseEntity.ok(
             userService.getUser(userId, currentUserId)
         );
